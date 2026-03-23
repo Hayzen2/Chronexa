@@ -1,14 +1,37 @@
 import {UserRepository} from "../repository/userRepository.ts";
-import {generateToken} from "../utils/JWTUtils.ts";
+import {generateAccessToken, generateRefreshToken} from "../utils/JWTUtils.ts";
 import {comparePassword} from "../utils/hashUtils.ts";
 import {RegisterDTO} from "../dto/requests/registerDTO.ts";
 import {LoginDTO} from "../dto/requests/loginDTO.ts";
 import {redisClient} from '../config/redis.ts';
+import {verifyRefreshToken} from "../utils/JWTUtils.ts";
+
+const ACCESS_TOKEN_EXPIRY = 15 * 60; // 15 minutes in seconds
+const REFRESH_TOKEN_EXPIRY = 7 * 24 * 3600; // 7 days in seconds
 
 export class AuthService {
     private readonly userRepository = UserRepository;
 
-    async register (registerData: RegisterDTO): Promise<string> {
+    async refreshToken(refreshToken: string): Promise<[string, string]> {
+        const decode = verifyRefreshToken(refreshToken);
+        const userId = decode.userId;
+        const storedRefreshToken = await redisClient.get(`refresh-token:${userId}`);
+        if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
+            throw new Error('No refresh token found, please log in again');
+        }
+        try {
+            const newAccessToken = await generateAccessToken(userId, ACCESS_TOKEN_EXPIRY);
+            const newRefreshToken = await generateRefreshToken(userId, REFRESH_TOKEN_EXPIRY);
+            await redisClient.set(`refresh-token:${userId}`, newRefreshToken, 'EX', REFRESH_TOKEN_EXPIRY);
+            await redisClient.set(`access-token:${userId}`, newAccessToken, 'EX', ACCESS_TOKEN_EXPIRY);
+            return [newAccessToken, newRefreshToken];
+        } catch {
+            await redisClient.del(`refresh-token:${userId}`); // Invalidate the refresh token if it's invalid
+            throw new Error('Invalid refresh token, please log in again');
+        }
+    }
+
+    async register (registerData: RegisterDTO): Promise<[string, string]> {
         const existingUser = await this.userRepository.findOne({ where: { username: registerData.username } });
         if (existingUser) {
             throw new Error('Username already exists');
@@ -18,12 +41,16 @@ export class AuthService {
         }
         const user = this.userRepository.create(registerData);
         await this.userRepository.save(user);
-        const accessToken = await generateToken(user);
-        await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', 7 * 24 * 3600); // Store token with 7 days expiry
-        return accessToken;
+        // Access token is client-side: to grant users access to resources (rotate frequently for security)
+        // Refresh token is server-side: to extend session continuity
+        const accessToken = await generateAccessToken(user.id, ACCESS_TOKEN_EXPIRY);
+        const refreshToken = await generateRefreshToken(user.id, REFRESH_TOKEN_EXPIRY);
+        await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', ACCESS_TOKEN_EXPIRY);
+        await redisClient.set(`refresh-token:${user.id}`, refreshToken, 'EX', REFRESH_TOKEN_EXPIRY);
+        return [accessToken, refreshToken];
     }
 
-    async login (loginData: LoginDTO): Promise<string> {
+    async login (loginData: LoginDTO): Promise<[string, string]> {
         const user = await this.userRepository.findOne({ where: { username: loginData.username } });
         if (!user) {
             throw new Error('Invalid username or password');
@@ -32,9 +59,11 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new Error('Invalid username or password');
         }
-        const accessToken = await generateToken(user);
-        await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', 7 * 24 * 3600); // Store token with 7 days expiry
-        return accessToken;
+        const accessToken = await generateAccessToken(user.id, ACCESS_TOKEN_EXPIRY);
+        const refreshToken = await generateRefreshToken(user.id, REFRESH_TOKEN_EXPIRY);
+        await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', ACCESS_TOKEN_EXPIRY);
+        await redisClient.set(`refresh-token:${user.id}`, refreshToken, 'EX', REFRESH_TOKEN_EXPIRY);
+        return [accessToken, refreshToken];
     }
 
     public validatePassword(validatePassword:string){
@@ -44,6 +73,7 @@ export class AuthService {
 
     async logout(userId: string): Promise<{ message: string }> {
         await redisClient.del(`access-token:${userId}`); // Remove the token from Redis to invalidate it
+        await redisClient.del(`refresh-token:${userId}`); // Remove the refresh token from Redis
         return { message: 'Logged out successfully' };
     }
 

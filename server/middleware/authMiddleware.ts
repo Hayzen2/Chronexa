@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from "express";
-import { verifyToken } from "../utils/JWTUtils.ts";
+import { verifyAccessToken} from "../utils/JWTUtils.ts";
 
 function authMiddleware(
     req: Request, 
@@ -16,7 +16,7 @@ function authMiddleware(
     }
 
     try {
-        const decoded = verifyToken(token);
+        const decoded = verifyAccessToken(token);
         req.userId = decoded.userId; // Attach userId of the current user to request
         if (!req.userId) {
             return res.status(401).json({ message: "Invalid token" });

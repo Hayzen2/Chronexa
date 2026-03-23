@@ -5,6 +5,8 @@ import authMiddleware from "../middleware/authMiddleware.ts";
 const router = Router();
 const authController = new AuthController();
 
+router.post("/refresh", (req: Request, res: Response) => authController.refreshToken(req, res));
+
 router.post("/register", (req: Request, res: Response) => authController.register(req, res));
 router.post("/login", (req: Request, res: Response) => authController.login(req, res));
 router.post("/forgot-password", (req: Request, res: Response) => authController.forgotPassword(req, res));

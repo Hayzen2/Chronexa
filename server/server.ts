@@ -3,6 +3,7 @@ import 'dotenv/config';
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import process from 'node:process';
 import authRoute from './route/authRoute.ts';
 import userRoute from './route/userRoute.ts';
@@ -25,8 +26,11 @@ const allowedOrigins = new Set([
     FRONTEND_URL
 ]);
 // Middleware that parses incoming request bodies with JSON payload
-// Without this, your routes won't be able to access JSON data (req.body)
-app.use(express.json()); 
+// This allows you to access the data sent in the request body via req.body in your routes
+app.use(express.json());
+// Middleware that parses cookies from incoming requests
+// This allows you to access cookies via req.cookies in your routes 
+app.use(cookieParser()); 
 
 // CORS configuration to allow requests from outside origins
 app.use(
@@ -36,7 +40,8 @@ app.use(
                 return callback(null, true);
             }
             return callback(new Error('Not allowed by CORS'));
-        }
+        },
+        credentials: true,
     })
 );
 
