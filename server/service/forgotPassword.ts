@@ -6,15 +6,14 @@ import process from 'node:process'
 import { hashPassword } from '../utils/hashUtils.ts';
 import path from 'node:path';
 import { emailQueue } from '../utils/queues/emailQueue.ts';
-import { ForgotPasswordDTO } from '../dto/forgotPasswordDTO.ts';
+import { ForgotPasswordDTO } from '../dto/requests/forgotPasswordDTO.ts';
 import { AuthService } from './authService.ts';
 
+const FRONTEND_URL = String(process.env.FRONTEND_URL);
 
-if (!process.env.FRONTEND_URL) {
+if (!FRONTEND_URL) {
   throw new Error("FRONTEND_URL not defined");
 }
-
-const FRONTEND_URL = process.env.FRONTEND_URL;
 
 export class ForgotPasswordService {
     private readonly userRepository = UserRepository;

@@ -1,9 +1,9 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany  } from 'typeorm';
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, OneToMany, PrimaryGeneratedColumn  } from 'typeorm';
 import { Task } from './taskEntity.ts';
 
 @Entity()
 export class User {
-    @PrimaryColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id!: string
 
     @CreateDateColumn()
@@ -12,24 +12,24 @@ export class User {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @Column({ unique: true })
+    @Column({ type: 'varchar', unique: true })
     username!: string;
 
-    @Column({ unique: true })
+    @Column({ type: 'varchar', unique: true })
     displayName!: string;
 
-    @Column({ unique: true })
+    @Column({ type: 'varchar', unique: true })
     avatarUrl!: string;
 
-    @Column({ unique: true })
+    @Column({ type: 'varchar', unique: true })
     email!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     hashedPassword!: string;
 
-    @OneToMany(() => Task, task => task.userId)
+    @OneToMany(() => Task, task => task.user)
     tasks!: Task[];
 
-    @Column()
+    @Column({ type: 'timestamp' })
     lastLogin!: Date;
 }

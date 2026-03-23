@@ -1,29 +1,29 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { TaskStatus } from "../enum/taskStatus.ts";
 import { User } from "./userEntity.ts";
 
 @Entity()
 export class Task {
-    @PrimaryColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     title!: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     description?: string | null;
 
     @ManyToOne(() => User, user => user.tasks)
     @JoinColumn({ name: 'userId' })
     user!: User;
 
-    @Column()
+    @Column({ type: 'enum', enum: TaskStatus, enumName: 'task_status' })
     status!: TaskStatus;
 
-    @Column()
+    @Column({ type: 'timestamp' })
     dueDate!: Date;
 
-    @Column()
+    @Column({ type: 'uuid' })
     userId!: string;
 
     @CreateDateColumn()

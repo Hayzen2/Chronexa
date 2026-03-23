@@ -1,11 +1,12 @@
 import {minioClient} from "./minio.ts";
 
-if(!process.env.OBJECT_STORAGE_AVATAR_BUCKET || !process.env.OBJECT_STORAGE_ATTACHMENT_BUCKET) {
+const OBJECT_STORAGE_AVATAR_BUCKET = String(process.env.OBJECT_STORAGE_AVATAR_BUCKET);
+const OBJECT_STORAGE_ATTACHMENT_BUCKET = String(process.env.OBJECT_STORAGE_ATTACHMENT_BUCKET);
+
+if(!OBJECT_STORAGE_AVATAR_BUCKET || !OBJECT_STORAGE_ATTACHMENT_BUCKET) {
     console.error("MinIO bucket names are not defined in environment variables.");
     process.exit(1);
 }
-const OBJECT_STORAGE_AVATAR_BUCKET = String(process.env.OBJECT_STORAGE_AVATAR_BUCKET);
-const OBJECT_STORAGE_ATTACHMENT_BUCKET = String(process.env.OBJECT_STORAGE_ATTACHMENT_BUCKET);
 
 export const initializeMinio = async () => {
     try {

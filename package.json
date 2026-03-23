@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cd client && vite",
     "build": "cd client && vite build",
-    "server": "tsx watch server/server.ts",
+    "server": "tsx --tsconfig tsconfig.server.json server/server.ts",
     "docker:start": "docker compose up -d",
     "docker:stop": "docker compose down",
     "electron:dev": "wait-on tcp:5173 && electron electron/main.js",
@@ -24,6 +24,7 @@
     "bullmq": "^5.71.0",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",

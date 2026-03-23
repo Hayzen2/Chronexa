@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../entity/userEntity.ts';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET not defined");
+const JWT_SECRET = String(process.env.JWT_SECRET);
+
+if (!JWT_SECRET) {
+    console.error("JWT_SECRET is not defined in environment variables.");
+    process.exit(1);
 }
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function generateToken(user: User): Promise<string> {
     const payload = {
