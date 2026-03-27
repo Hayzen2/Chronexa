@@ -8,6 +8,8 @@ import {verifyRefreshToken} from "../utils/JWTUtils.ts";
 
 const ACCESS_TOKEN_EXPIRY = 15 * 60; // 15 minutes in seconds
 const REFRESH_TOKEN_EXPIRY = 7 * 24 * 3600; // 7 days in seconds
+// Refresh token: stored in HttpOnly cookie
+// Access token: stored in memory (client-side) and sent in Authorization header
 
 export class AuthService {
     private readonly userRepository = UserRepository;
