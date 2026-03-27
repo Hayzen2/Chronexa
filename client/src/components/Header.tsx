@@ -33,13 +33,6 @@ export default function Header() {
 
                         <button
                             className="bg-pink-300 hover:bg-pink-400 text-white font-semibold py-2 px-4 rounded-lg"
-                            onClick={() => navigate("/schedule")}
-                        >
-                            Schedule
-                        </button>
-
-                        <button
-                            className="bg-pink-300 hover:bg-pink-400 text-white font-semibold py-2 px-4 rounded-lg"
                             onClick={() => navigate("/profile")}
                         >
                             Profile
