@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Header() {
-    const { accessToken } = useAuth();
+    const { accessToken, Logout } = useAuth();
     const navigate = useNavigate();
 
     return (
@@ -48,8 +48,7 @@ export default function Header() {
                         <button
                             className="bg-red-300 hover:bg-red-400 text-white font-semibold py-2 px-4 rounded-lg"
                             onClick={() => {
-                                // TODO: call logout API later
-                                navigate("/");
+                                Logout();
                             }}
                         >
                             Logout

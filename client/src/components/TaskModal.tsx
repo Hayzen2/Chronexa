@@ -24,7 +24,7 @@ export default function TaskModal({ tasks, day, onClose }: TaskModalProps) {
                     <h2 className="font-bold text-lg">Tasks - Day {day}</h2>
                     <button onClick={onClose}>✕</button>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
+                <div className="space-y-2 max-h-64 overflow-y-auto"> {/*overflow-y-auto for scroll if too many tasks*/}
                     {tasks.map((task) => (
                         <div 
                         key={task.id} 

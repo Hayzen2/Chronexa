@@ -41,7 +41,7 @@ export default function Register() {
     const handleRegister = async () => {
         try {
             await Register(username, password, email);
-            navigate("/"); // auto login → go home
+            navigate("/"); // auto login 
         } catch (err) {
             console.error("Register failed:", err);
         }
