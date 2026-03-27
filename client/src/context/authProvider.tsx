@@ -1,25 +1,35 @@
 import { useState, useEffect, type ReactNode, useMemo } from "react";
 import { AuthContext } from "./authContext";
 import { setAccessToken } from "../api/axios";
-import { refreshApi, logoutApi, loginApi } from "../api/authApi";
+import { refreshApi, logoutApi, loginApi, registerApi } from "../api/authApi";
+import { getUserProfile } from "../api/userApi";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [accessTokenState, setAccessTokenState] = useState<string | null>(null);
+    const [usernameState, setUsernameState] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrlState ] = useState<string | null>(null);
+
     // useEffect is used to perform side effects in functional components
     // that run at specific times 
     useEffect(() => {
-        const refreshToken = async () => {
+        const initAuth = async () => {
             try {
-                const newAccessToken = await refreshApi(); // Call the refresh API to get a new access token
-                setAccessToken(newAccessToken);
+                const newAccessToken = await refreshApi(); // Attempt to refresh the access token on component mount
+                setAccessToken(newAccessToken); // Update the access token in the API client
                 setAccessTokenState(newAccessToken); // Update the access token in the state
+
+                const userProfile = await getUserProfile(); // Fetch the user's profile information
+                setUsernameState(userProfile.username); // Update the username in the state
+                setAvatarUrlState(userProfile.avatarUrl); // Update the avatar URL in the state
             } catch (error) {
-                console.error('Error refreshing token:', error);
+                console.error('Error initializing authentication:', error);
+                setAccessToken(null); // Clear the access token in the API client on failure
+                setAccessTokenState(null); // Clear the access token in the state on failure
             }
         };
 
-        refreshToken();
-    }, []); // runs only once when the component mounts (when the provider is first rendered)
+        initAuth(); // Call the initialization function when the component mounts
+    }, []);
 
     const Login = async (username: string, password: string) => {
         try{
@@ -27,8 +37,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const newAccessToken = response.data; // Assuming the access token is in the response data
             setAccessToken(newAccessToken); // Update the access token in the API client
             setAccessTokenState(newAccessToken); // Update the access token in the state
+        
+            const userProfile = await getUserProfile();
+            setUsernameState(userProfile.username);
+            setAvatarUrlState(userProfile.avatarUrl);
         } catch (error) {
             console.error('Error logging in:', error);
+            throw error; 
+        }
+    }
+
+    const Register = async (username: string, password: string, email: string) => {
+        try {
+            const response = await registerApi(username, email, password);// Call the register API with the provided username and password
+            const newAccessToken = response.data; // Assuming the access token is in the response data
+            setAccessToken(newAccessToken); // Update the access token in the API client
+            setAccessTokenState(newAccessToken); // Update the access token in the state
+        
+            const userProfile = await getUserProfile();
+            setUsernameState(userProfile.username);
+            setAvatarUrlState(userProfile.avatarUrl);
+        } catch (error) {
+            console.error('Error registering:', error);
             throw error; 
         }
     }
@@ -42,14 +72,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setAccessToken(null); // Clear the access token in the API client
             setAccessTokenState(null); // Clear the access token in the state
+            setUsernameState(null); // Clear the username in the state
+            setAvatarUrlState(null); // Clear the avatar URL in the state
         }
     }
 
     const value = useMemo(() => ({
         accessToken: accessTokenState,
+        username: usernameState,
+        avatarUrl: avatarUrl,
         Login,
-        Logout
-    }), [accessTokenState]); 
+        Logout,
+        Register
+    }), [accessTokenState, usernameState, avatarUrl]); 
 
     return (
         <AuthContext.Provider value = {

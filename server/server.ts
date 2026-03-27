@@ -13,6 +13,7 @@ import { dataSource } from "./config/db.ts";
 
 const FRONTEND_URL = String(process.env.FRONTEND_URL);
 const BACKEND_PORT = Number(process.env.BACKEND_PORT);
+const OBJECT_STORAGE_URL = String(process.env.OBJECT_STORAGE_URL);
 if(!FRONTEND_URL) {
     console.error("FRONTEND_URL is not defined in environment variables.");
     process.exit(1);
@@ -21,9 +22,14 @@ if(!BACKEND_PORT) {
     console.error("BACKEND_PORT is not defined in environment variables.");
     process.exit(1);
 }
+if(!OBJECT_STORAGE_URL) {
+    console.error("OBJECT_STORAGE_URL is not defined in environment variables.");
+    process.exit(1);
+}
 const app = express();
 const allowedOrigins = new Set([
-    FRONTEND_URL
+    FRONTEND_URL,
+    OBJECT_STORAGE_URL
 ]);
 // Middleware that parses incoming request bodies with JSON payload
 // This allows you to access the data sent in the request body via req.body in your routes

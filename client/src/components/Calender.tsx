@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getTasksByUserId } from "../api/taskApi";
-import { taskModal } from "./TaskModal";
+import  TaskModal  from "./TaskModal";
+import {getStatusColor} from "../utils/taskColor";
 
 interface Task {
     id: string;
@@ -9,6 +9,8 @@ interface Task {
     dueDate: string;
     status: string;
 }
+
+
 export default function Calender() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -51,18 +53,25 @@ export default function Calender() {
     }
 
     // Group tasks by due date
-    const taskByDate: Record<string, Task[]> = {};
+    const taskByDate: Record<number, Task[]> = {};
     tasks.forEach(task => {
         const dueDate = new Date(task.dueDate);
         const taskMonth = dueDate.getMonth();
         const taskYear = dueDate.getFullYear();
         const dayOfMonth = dueDate.getDate();
+
+        let taskStatus = task.status;
+
+        if(taskStatus !== "COMPLETED" && dueDate < today) {
+            taskStatus = "OVERDUE";
+        }
+
         // Show only those in current month and year
         if(taskMonth === month && taskYear === year){
             if (!taskByDate[dayOfMonth]){
                 taskByDate[dayOfMonth] = [];
             } 
-            taskByDate[dayOfMonth].push(task);
+            taskByDate[dayOfMonth].push({ ...task, status: taskStatus });
         }
         
     });
@@ -70,7 +79,7 @@ export default function Calender() {
 
     // Add empty divs for days before the first day of the month
     for(let i = 0 ; i < firstDayOfMonth; i++) {
-        days.push(<div key={`empty-${i}`} className="w-1/7 h-16"></div>);
+        days.push(<div key={`empty-${i}`} className="h-16"></div>);
     }
 
     // Add divs for each day of the month
@@ -91,7 +100,7 @@ export default function Calender() {
                 {/* Task titles */}
                 <div className="mt-1 space-y-1">
                     {tasksForDay.slice(0, 3).map((task) => (
-                        <div key={task.id} className="text-xs bg-pink-200 text-pink-800 p-1 rounded">
+                        <div key={task.id} className={`text-xs ${getStatusColor(task.status)} p-1 rounded`}>
                             {task.title}
                         </div>
                     ))}
@@ -136,6 +145,14 @@ export default function Calender() {
                     {days}
                 </div>
             </div>
+            {showAllTasksModal !== null && (
+                <TaskModal
+                    day={showAllTasksModal}
+                    tasks={taskByDate[showAllTasksModal] || []}
+                    onClose={() => setShowAllTasksModal(null)}
+                />
+            )}
         </div>
+        
     );
 }

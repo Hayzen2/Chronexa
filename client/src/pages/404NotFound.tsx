@@ -4,18 +4,33 @@ export default function NotFoundPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen flex flex-col">
-            <main className="flex-grow flex items-center justify-center">
-                <h2 className="text-3xl font-bold">404 Not Found</h2>
-                <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => directToHomePage()}>
-                    Go to Home
+        <div className="min-h-screen flex items-center justify-center bg-pink-50">
+            
+            <div className="text-center bg-white p-8 rounded-2xl shadow-md">
+
+                {/* Big 404 */}
+                <h1 className="text-6xl font-bold text-pink-400 mb-2">
+                    404
+                </h1>
+
+                {/* Message */}
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                    Page not found
+                </h2>
+
+                <p className="text-gray-500 mb-6">
+                    Oops! The page you're looking for doesn't exist.
+                </p>
+
+                {/* Button */}
+                <button
+                    onClick={() => navigate("/")}
+                    className="bg-pink-400 hover:bg-pink-500 text-white font-medium py-2 px-5 rounded-lg transition"
+                >
+                    Go back home
                 </button>
-            </main>
+
+            </div>
         </div>
     );
-
-    function directToHomePage() {
-        navigate("/");
-    }
 }
-
