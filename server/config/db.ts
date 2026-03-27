@@ -27,7 +27,7 @@ export const dataSource = new DataSource({
     database: DB_NAME,
     // Keep schema sync opt-in to avoid pg client deprecation warnings during init.
     synchronize: DB_SYNCHRONIZE,
-    logging: false, // Disable logging for production
+    logging: true, // Enable logging to see queries and errors
     entities: [User, Task],
 })
 

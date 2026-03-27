@@ -6,7 +6,7 @@ interface AuthContextType {
     username: string | null;
     avatarUrl: string | null;
     Login: (username: string, password: string) => Promise<void>;
-    Register: (username: string, password: string, email: string) => Promise<void>;
+    Register: (username: string, email: string, password: string) => Promise<void>;
     Logout: () => Promise<void>;
 }
 

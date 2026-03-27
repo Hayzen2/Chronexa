@@ -15,21 +15,18 @@ export class User {
     @Column({ type: 'varchar', unique: true })
     username!: string;
 
-    @Column({ type: 'varchar', unique: true })
-    displayName!: string;
+    @Column({ type: 'varchar', nullable: true })
+    avatarUrl?: string | null;
 
-    @Column({ type: 'varchar', unique: true })
-    avatarUrl!: string;
-
-    @Column({ type: 'varchar', unique: true })
+    @Column({ type: 'varchar', nullable: false, unique: true })
     email!: string;
 
-    @Column({ type: 'varchar' })
+    @Column({ type: 'varchar', nullable: false })
     hashedPassword!: string;
 
     @OneToMany(() => Task, task => task.user)
     tasks!: Task[];
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     lastLogin!: Date;
 }

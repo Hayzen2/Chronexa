@@ -14,7 +14,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const initAuth = async () => {
             try {
-                const newAccessToken = await refreshApi(); // Attempt to refresh the access token on component mount
+                const data = await refreshApi(); // Attempt to refresh the access token on component mount
+                const newAccessToken = data.accessToken;
                 setAccessToken(newAccessToken); // Update the access token in the API client
                 setAccessTokenState(newAccessToken); // Update the access token in the state
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUsernameState(userProfile.username); // Update the username in the state
                 setAvatarUrlState(userProfile.avatarUrl); // Update the avatar URL in the state
             } catch (error) {
-                console.error('Error initializing authentication:', error);
+                console.info('No valid refresh token, user not logged in yet', error);
                 setAccessToken(null); // Clear the access token in the API client on failure
                 setAccessTokenState(null); // Clear the access token in the state on failure
             }
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const Login = async (username: string, password: string) => {
         try{
             const response = await loginApi(username, password); // Call the login API with the provided username and password
-            const newAccessToken = response.data; // Assuming the access token is in the response data
+            const newAccessToken = response.accessToken; // Extract the access token from response
             setAccessToken(newAccessToken); // Update the access token in the API client
             setAccessTokenState(newAccessToken); // Update the access token in the state
         
@@ -47,10 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }
 
-    const Register = async (username: string, password: string, email: string) => {
+    const Register = async (username: string, email: string, password: string) => {
         try {
             const response = await registerApi(username, email, password);// Call the register API with the provided username and password
-            const newAccessToken = response.data; // Assuming the access token is in the response data
+            const newAccessToken = response.accessToken; // Extract the access token from response
             setAccessToken(newAccessToken); // Update the access token in the API client
             setAccessTokenState(newAccessToken); // Update the access token in the state
         

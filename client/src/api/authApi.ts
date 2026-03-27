@@ -10,9 +10,9 @@ export const refreshApi = async () => {
   }
 }
 
-export const loginApi = async (email: string, password: string) => {
+export const loginApi = async (username: string, password: string) => {
   try {
-    const response = await api.post('/auth/login', { email, password });
+    const response = await api.post('/auth/login', { username, password });
     return response.data; // Assuming the access token is in the response data
   } catch (error) {
     console.error('Error logging in:', error);

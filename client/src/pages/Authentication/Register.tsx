@@ -34,13 +34,28 @@ export default function Register() {
         if (!/[A-Z]/.test(value)) errors.push("1 uppercase letter");
         if (!/[a-z]/.test(value)) errors.push("1 lowercase letter");
         if (!/[0-9]/.test(value)) errors.push("1 number");
+        if (!/[@$!%*?&]/.test(value)) errors.push("1 special character (@$!%*?&)");
 
         setPasswordErrors(errors);
     };
 
     const handleRegister = async () => {
+        // Validate all fields
+        if (!username.trim()) {
+            alert("Username is required");
+            return;
+        }
+        if (!email.trim() || emailError) {
+            alert("Valid email is required");
+            return;
+        }
+        if (passwordErrors.length > 0) {
+            alert("Password does not meet all requirements");
+            return;
+        }
+
         try {
-            await Register(username, password, email);
+            await Register(username, email, password); // Call the Register function from auth context
             navigate("/"); // auto login 
         } catch (err) {
             console.error("Register failed:", err);

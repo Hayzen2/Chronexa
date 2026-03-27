@@ -12,8 +12,6 @@ export async function generateAccessToken(userId: string, expiresIn: number): Pr
     const payload = {
         userId: userId,
         type: 'access',
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + (typeof expiresIn === 'string' ? getSecondsFromTimeUnit(expiresIn) : expiresIn)
     };
     return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn});
 }
@@ -22,28 +20,8 @@ export async function generateRefreshToken(userId: string, expiresIn: number): P
     const payload = {
         userId: userId,
         type: 'refresh',
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + (typeof expiresIn === 'string' ? getSecondsFromTimeUnit(expiresIn) : expiresIn)
     };
     return jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn});
-}
-
-// Ex: "15m" -> 900 seconds, "7d" -> 604800 seconds
-function getSecondsFromTimeUnit(time: string): number {
-    const unit = time.slice(-1); // Get the last character to determine the time unit
-    const value = parseInt(time.slice(0, -1)); // Get the numeric part of the time string
-    switch (unit) {
-        case 's':
-            return value;
-        case 'm':
-            return value * 60;
-        case 'h':
-            return value * 3600;
-        case 'd':
-            return value * 24 * 3600;
-        default:
-            throw new Error('Invalid time format');
-    }
 }
 
 export function verifyAccessToken(token: string): { 

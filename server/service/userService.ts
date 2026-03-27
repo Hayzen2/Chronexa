@@ -48,7 +48,7 @@ export class UserService {
             id: user.id,
             username: user.username,
             email: user.email,
-            avatarUrl: user.avatarUrl
+            avatarUrl: user.avatarUrl || null, // Ensure avatarUrl is null if it's undefined
         };
     }
 

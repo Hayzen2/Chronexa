@@ -1,6 +1,7 @@
 import {UserRepository} from "../repository/userRepository.ts";
+import { User } from "../entity/userEntity.ts";
 import {generateAccessToken, generateRefreshToken} from "../utils/JWTUtils.ts";
-import {comparePassword} from "../utils/hashUtils.ts";
+import {comparePassword, hashPassword} from "../utils/hashUtils.ts";
 import {RegisterDTO} from "../dto/requests/registerDTO.ts";
 import {LoginDTO} from "../dto/requests/loginDTO.ts";
 import {redisClient} from '../config/redis.ts';
@@ -41,14 +42,34 @@ export class AuthService {
         if (!this.validatePassword(registerData.password)) {
             throw new Error('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character');
         }
-        const user = this.userRepository.create(registerData);
-        await this.userRepository.save(user);
+        
+        // Hash the password before saving the user
+        let hashedPassword: string;
+        try {
+            hashedPassword = await hashPassword(registerData.password);
+        } catch (error) {
+            throw new Error(`Failed to hash password: ${error instanceof Error ? error.message : String(error)}`);
+        }
+        
+        if (!hashedPassword) {
+            throw new Error('Password hashing failed - no hash generated');
+        }
+
+        // Create user entity with all required fields
+        const user = new User();
+        user.username = registerData.username;
+        user.email = registerData.email;
+        user.hashedPassword = hashedPassword;
+        user.avatarUrl = null;
+        user.lastLogin = new Date();
+        
+        const savedUser = await this.userRepository.save(user);
         // Access token is client-side: to grant users access to resources (rotate frequently for security)
         // Refresh token is server-side: to extend session continuity
-        const accessToken = await generateAccessToken(user.id, ACCESS_TOKEN_EXPIRY);
-        const refreshToken = await generateRefreshToken(user.id, REFRESH_TOKEN_EXPIRY);
-        await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', ACCESS_TOKEN_EXPIRY);
-        await redisClient.set(`refresh-token:${user.id}`, refreshToken, 'EX', REFRESH_TOKEN_EXPIRY);
+        const accessToken = await generateAccessToken(savedUser.id, ACCESS_TOKEN_EXPIRY);
+        const refreshToken = await generateRefreshToken(savedUser.id, REFRESH_TOKEN_EXPIRY);
+        await redisClient.set(`access-token:${savedUser.id}`, accessToken, 'EX', ACCESS_TOKEN_EXPIRY);
+        await redisClient.set(`refresh-token:${savedUser.id}`, refreshToken, 'EX', REFRESH_TOKEN_EXPIRY);
         return [accessToken, refreshToken];
     }
 
@@ -61,6 +82,10 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new Error('Invalid username or password');
         }
+        // Update lastLogin on successful login
+        user.lastLogin = new Date();
+        await this.userRepository.save(user);
+        
         const accessToken = await generateAccessToken(user.id, ACCESS_TOKEN_EXPIRY);
         const refreshToken = await generateRefreshToken(user.id, REFRESH_TOKEN_EXPIRY);
         await redisClient.set(`access-token:${user.id}`, accessToken, 'EX', ACCESS_TOKEN_EXPIRY);
