@@ -88,13 +88,10 @@ DB_SYNCHRONIZE=true
 REFRESH_TOKEN_SECRET=your_refresh_secret_key_here
 ACCESS_TOKEN_SECRET=your_access_secret_key_here
 
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-MAIL_FROM=Chronexa <no-reply@chronexa.com>
-MAIL_REPLY_TO=no-reply@chronexa.com
+# Email (Resend)
+RESEND_API_KEY=your_resend_api_key_here
+MAIL_FROM=Chronexa <noreply@chronexa.com>
+MAIL_REPLY_TO=noreply@chronexa.com
 
 # Redis Cache
 REDIS_URL=redis://localhost:6379

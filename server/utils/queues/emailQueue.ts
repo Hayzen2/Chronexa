@@ -1,12 +1,12 @@
 /* This file sets up a Bullmq queue for handling email sending 
-in the background. It uses Nodemailer to send emails and 
+in the background. It uses Resend to send emails and 
 connects to a Redis instance variable. 
 The queue automatically processes jobs that contain email 
 data and sends the emails. 
 */
 
 import { Queue} from "bullmq";
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import {redisConnection} from '../../config/redis.ts';
 
 
@@ -17,15 +17,7 @@ import {redisConnection} from '../../config/redis.ts';
 // Workers listen to the same queue and process the jobs
 export const emailQueue = new Queue('emailQueue', {connection: redisConnection});
 
-// Create a reusable SMTP client configuration
-// It is only a prepared transporter object that can be used to send emails later
-export const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT),
-    secure: Number(process.env.MAIL_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
-    },
-});
+// Create a Resend email client
+// Resend is a modern email service provider API
+export const resend = new Resend(process.env.RESEND_API_KEY);
 
