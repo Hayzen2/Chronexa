@@ -13,7 +13,7 @@ export default function ForgotPassword() {
                     type="submit"
                     className="w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600 transition duration-200"
                 >
-                    Send Reset Instructions
+                    Send Reset Link
                 </button>
             </form>
         </div>
